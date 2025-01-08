@@ -111,6 +111,19 @@ Follow the prompts to compress, decompress, or list files.
    java src/App
    ```
 
+## Java Concepts Used
+
+This project demonstrates the following Java concepts:
+
+- **Object-Oriented Programming (OOP):** The project is structured using classes and objects, encapsulating related data and behavior.
+- **File I/O:** Reading from and writing to files using `RandomAccessFile`, `FileInputStream`, `FileOutputStream`, and `BufferedReader`.
+- **Exception Handling:** Proper handling of exceptions using try-catch blocks to ensure the application runs smoothly.
+- **Multi-threading:** Utilizing `ExecutorService`, `Callable`, and `CountDownLatch` to perform parallel processing for faster compression and decompression.
+- **Collections Framework:** Using `List`, `Hashtable`, and `TreeMap` to manage and store data efficiently.
+- **Streams API:** Leveraging Java Streams for processing collections of objects.
+- **Third-party Libraries:** Integrating the Zstandard (Zstd) compression library for efficient file compression and decompression.
+- **Command-line Interface (CLI):** Interacting with the user through the command line to perform various operations.
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
