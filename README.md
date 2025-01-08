@@ -1,18 +1,120 @@
-## Getting Started
+# UltraFastFileZipper
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+UltraFastFileZipper is a high-performance file compression and decompression tool that utilizes multi-threading to achieve fast and efficient file operations. This project is designed to handle large files by dividing them into chunks and processing them in parallel using multiple threads.
 
-## Folder Structure
+## Features
 
-The workspace contains two folders by default, where:
+- Compress large files into smaller sizes using Zstandard (Zstd) compression.
+- Decompress files back to their original state.
+- List all compressed files in the specified directory.
+- Multi-threaded processing for faster compression and decompression.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+## File Structure
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+The project directory structure is as follows:
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+```
+UltraFastFileZipper/
+├── src/
+│   ├── App.java
+│   ├── FileZipper.java
+│   └── Message.java
+└── README.md
+```
 
-## Dependency Management
+```
++---------------------+
+| UltraFastFileZipper |
++---------------------+
+        |
+        +--- src
+        |    |
+        |    +--- App.java
+        |    +--- FileZipper.java
+        |    +--- Message.java
+        |
+        +--- README.md
+```
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+## Internal File Chunk Division and Compression
+
+The compression process involves dividing the input file into smaller chunks and compressing each chunk in parallel using multiple threads. This approach significantly reduces the time required for compression.
+
+```
++---------------------+
+|   Input File        |
++---------------------+
+        |
+        v
++---------------------+
+|  Divide into Chunks |
++---------------------+
+        |
+        v
++---------------------+
+|  Compress in Parallel|
++---------------------+
+        |
+        v
++---------------------+
+|  Compressed File    |
++---------------------+
+```
+
+## How to Use
+
+1. **Run the Application:**
+   - Compile and run the `App.java` file.
+   - Follow the on-screen instructions to select the desired operation (compress, decompress, list files, or exit).
+
+2. **Compress a File:**
+   - Provide the file path to be compressed.
+   - The application will divide the file into chunks and compress each chunk using multiple threads.
+   - The compressed file and metadata will be saved in the specified output directory.
+
+3. **Decompress a File:**
+   - Provide the root directory path of the compressed file.
+   - The application will read the metadata and decompress the file back to its original state.
+
+4. **List All Compressed Files:**
+   - The application will display all compressed files in the specified directory.
+
+## Example
+
+```sh
+java App
+```
+
+Follow the prompts to compress, decompress, or list files.
+
+## Requirements
+
+- Java 8 or higher
+- Zstandard (Zstd) library
+
+## Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/yourusername/UltraFastFileZipper.git
+   ```
+2. Navigate to the project directory:
+   ```sh
+   cd UltraFastFileZipper
+   ```
+3. Compile the Java files:
+   ```sh
+   javac src/*.java
+   ```
+4. Run the application:
+   ```sh
+   java src/App
+   ```
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+## License
+
+This project is licensed under the MIT License.
