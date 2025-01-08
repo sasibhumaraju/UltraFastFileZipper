@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.github.luben.zstd.Zstd;
@@ -93,20 +90,16 @@ public class FileZipper {
             metaFile.write((bytes.length+",").getBytes());
 
             int temp = i;
-
             tasks.add(()->{
                 try {
                     byte[] cb = Zstd.compress(bytes);
                     compressedBytes.put(temp, cb);
-                    System.out.println(cb.length);
-                    // System.out.println(Thread.currentThread().getName());
 
                 } catch (Exception e) {
                     Message.error("Compressing chuncks failed"+e.getMessage(), 2);
                 } finally {
                     
                     latch.countDown();
-                    // System.out.println(latch.getCount());
                 }
                 return true;
             });
@@ -119,16 +112,13 @@ public class FileZipper {
         // stops current thread until count reaches to zero
         latch.await();
         executor.shutdown();
-        System.out.println(";;"+latchCount);
-        System.out.println("latch count: "+latch.getCount());
 
-        
-        
 
         RandomAccessFile craf = new RandomAccessFile(outFile,"rw");
         metaFile.write("\n".getBytes());
-        // interating compressedBytes map, to store compressed bytes in out file one by one
-        compressedBytes.forEach((Integer i, byte[] cb) -> {
+        // iterating compressedBytes map, to store compressed bytes in out file one by one
+        TreeMap<Integer,byte[]> orderedCBytes = new TreeMap<>(compressedBytes);
+        orderedCBytes.forEach((Integer i, byte[] cb) -> {
             try {
                 craf.seek(craf.length());
                 craf.write(cb);
@@ -176,6 +166,7 @@ public class FileZipper {
         File rootFile, childFile, metaFile; // root, org file, meta file - file refs
 
         // take input and validate 
+        Message.info("Provide File Path to UnZip", 0);
         while(true) {
             compressedRootDirLocation = sc.nextLine();
             rootFile = new File(compressedRootDirLocation);
@@ -192,28 +183,54 @@ public class FileZipper {
             String[] metaData = br.readLine().split(":");
 
             List<Integer> orgChunckLengths = Arrays.stream(br.readLine().split(",")).map((v)->Integer.parseInt(v)).collect(Collectors.toList());
+            List<Integer> comChunckLengths = Arrays.stream(br.readLine().split(",")).map((v)->Integer.parseInt(v)).collect(Collectors.toList());
 
-            System.out.println(orgChunckLengths);
-            int orgFileLength = Integer.parseInt(metaData[0]);
             String extension = metaData[2];
             String orgFileName = metaData[1];
 
+            System.out.println(orgChunckLengths);
+            System.out.println(comChunckLengths);
+
             // input stream from compressed file
-            FileInputStream fi = new FileInputStream(childFile);
+            RandomAccessFile raf = new RandomAccessFile(childFile, "r");
+            RandomAccessFile fo = new RandomAccessFile(getDirectoryInCDrive("c:/UltraFileUnZipper").getAbsolutePath()+"/"+orgFileName+"."+extension,"rw");
+            int seekPostion = 0;
 
-            // read all bytes form input stream and decompress
-            byte[] orFB = Zstd.decompress(fi.readAllBytes(), orgFileLength);
+            for(int i = 0; i<comChunckLengths.size(); i++) {
+                int v = comChunckLengths.get(i);
+                int o = orgChunckLengths.get(i);
+                byte[] bytes = new byte[v];
+                System.out.println("seek postion:"+seekPostion);
+                raf.seek(seekPostion);
+                raf.readFully(bytes);
+                fo.seek(fo.length());
+                fo.write(Zstd.decompress(bytes, o));
+                seekPostion +=v;
+            }
 
-            // re store org file
-            FileOutputStream fo = new FileOutputStream(getDirectoryInCDrive("c:/UltraFileUnZipper").getAbsolutePath()+"/"+orgFileName+"."+extension);
-            fo.write(orFB);
-
+            Message.info("UnZipped succesfully...", 2);
             // closing resources
-            br.close(); fi.close(); fo.close();
+            br.close();  fo.close(); raf.close();
            
         } catch (Exception e) {
-            Message.error("Failed unzip the file"+e.getMessage(), 2);
+            Message.error("decompression failed", 0);
+            Message.error("Failed unzip the file"+e.getMessage(), 1);
+            
         } 
+    }
+
+    public static void showAllZippedFiles() {
+        Message.info("Zipped Files:", 0);
+        File dir = new File("C:/UltraFileZipper");
+        if(dir.exists() && dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            for(File i : files) 
+                System.out.println(">> "+i.getAbsolutePath());
+            System.out.println();
+            if(files.length == 0) Message.info("No Zipped Files Exists", 2);
+        } else {
+            Message.error("No Zipped Files Exists", 2);
+        }
     }
     
 }
