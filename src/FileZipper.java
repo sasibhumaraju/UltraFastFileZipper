@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -34,9 +33,11 @@ public class FileZipper {
     public static void compress()  {
 
         // Accept valid file 
-        Message.info("Provide File Path", 0);
-        while(!(file = new File(sc.nextLine())).exists() || !file.isFile())  {
-            Message.info("Provide valid file path: ", 0);
+        Message.info("Provide File Path or type \"main\" to exit to main menu: ", 0);
+        String input;
+        while(!(file = new File(input = sc.nextLine())).exists() || !file.isFile())  {
+            if(input.trim().toLowerCase().compareTo("main") == 0) return;
+            Message.info("Provide valid file path or type \"main\" to exit to main menu: ", 0);
         }
 
         Message.info("File taken..", 0);
@@ -56,7 +57,6 @@ public class FileZipper {
         // create random file access pointer in "r" mode
         RandomAccessFile raSource = new RandomAccessFile(file, "r");
 
-        Message.info("Inside core", 0);
         // varibles for file length & file name
         int threadCount = Runtime.getRuntime().availableProcessors();
         int fileLength = (int) file.length();
@@ -123,13 +123,13 @@ public class FileZipper {
                 craf.seek(craf.length());
                 craf.write(cb);
                 metaFile.write((cb.length+",").getBytes());
-                System.out.println(i);
 
             } catch (IOException e) {
                 Message.error("Saving compressed bytes to file failed"+e.getMessage(), 2);
             }
         });
 
+        Message.info(">>> ["+file.getName()+"] zipped in \"c:/UltraFileZipper\" folder.", latchCount);
         craf.close(); raSource.close(); metaFile.close();
 
     }
@@ -154,7 +154,6 @@ public class FileZipper {
     private static File getDirectoryInCDrive(String name) {
         File file = new File(name);
         if(!file.exists()) file.mkdirs();
-        System.out.println("*** "+file.getAbsolutePath()+" *******");
         return file;
     }
 
@@ -166,14 +165,15 @@ public class FileZipper {
         File rootFile, childFile, metaFile; // root, org file, meta file - file refs
 
         // take input and validate 
-        Message.info("Provide File Path to UnZip", 0);
+        Message.info("Provide File Path to UnZip or type \"main\" to exit to main menu:", 0);
         while(true) {
             compressedRootDirLocation = sc.nextLine();
+            if(compressedRootDirLocation.trim().toLowerCase().compareTo("main") == 0) return;
             rootFile = new File(compressedRootDirLocation);
             childFile = new File(compressedRootDirLocation+"/"+rootFile.getName()+".zip");
             metaFile = new File(compressedRootDirLocation+"/"+rootFile.getName()+".txt");
             if(rootFile.exists() && rootFile.isDirectory() && childFile.exists() && metaFile.exists()) break;
-            Message.error("Please provide valid zip root path..", 2);
+            Message.error("Please provide valid zip root path or type \"main\" to exit to main menu:", 2);
         }
         
 
@@ -188,9 +188,6 @@ public class FileZipper {
             String extension = metaData[2];
             String orgFileName = metaData[1];
 
-            System.out.println(orgChunckLengths);
-            System.out.println(comChunckLengths);
-
             // input stream from compressed file
             RandomAccessFile raf = new RandomAccessFile(childFile, "r");
             RandomAccessFile fo = new RandomAccessFile(getDirectoryInCDrive("c:/UltraFileUnZipper").getAbsolutePath()+"/"+orgFileName+"."+extension,"rw");
@@ -200,7 +197,7 @@ public class FileZipper {
                 int v = comChunckLengths.get(i);
                 int o = orgChunckLengths.get(i);
                 byte[] bytes = new byte[v];
-                System.out.println("seek postion:"+seekPostion);
+              
                 raf.seek(seekPostion);
                 raf.readFully(bytes);
                 fo.seek(fo.length());
@@ -208,7 +205,7 @@ public class FileZipper {
                 seekPostion +=v;
             }
 
-            Message.info("UnZipped succesfully...", 2);
+            Message.info(">>> ["+rootFile.getName()+"] restored/unzipped in \"c:/UltraFileUnZipper\".", 1);
             // closing resources
             br.close();  fo.close(); raf.close();
            
